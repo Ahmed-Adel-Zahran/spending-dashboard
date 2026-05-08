@@ -76,7 +76,7 @@ export const useTransactionStore = create((set, get) => ({
         if (bank === 'RBC' && (accountType === 'Visa' || accountType === 'Mastercard')) {
           parsed = parseRBCCreditCard(fullText);
         } else if (bank === 'RBC') {
-          parsed = parseRBCChequing(fullText);
+          parsed = parseRBCChequing(fullText, pages);
         } else if (bank === 'CIBC' && accountType === 'Credit Card') {
           parsed = parseCIBCCreditCard(fullText);
         } else if (bank === 'CIBC') {

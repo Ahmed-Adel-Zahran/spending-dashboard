@@ -7,7 +7,7 @@ const MONTHS = {
 
 function inferYear(fullText) {
   const periodMatch = fullText.match(
-    /(?:statement\s+from|for)\s+(\w+)\s+\d{1,2},?\s*(\d{4})\s*(?:to|-|–)\s*(\w+)\s+\d{1,2},?\s*(\d{4})/i
+    /(?:statement\s+from|from|for)\s+(\w+)\s+\d{1,2},?\s*(\d{4})\s*(?:to|-|–)\s*(\w+)\s+\d{1,2},?\s*(\d{4})/i
   );
   if (periodMatch) {
     return { startYear: parseInt(periodMatch[2]), endYear: parseInt(periodMatch[4]) };
@@ -38,7 +38,107 @@ function toDateStr(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-export function parseRBCChequing(fullText) {
+export function parseRBCChequing(fullText, pages) {
+  if (pages && pages.length > 0) {
+    const positional = parseRBCChequingPositional(pages, fullText);
+    if (positional.length > 0) return positional;
+  }
+  return parseRBCChequingText(fullText);
+}
+
+function parseRBCChequingPositional(pages, fullText) {
+  const yearInfo = inferYear(fullText);
+  const transactions = [];
+
+  for (const page of pages) {
+    const lines = page.lines || [];
+    const allItems = lines.flat();
+
+    let withdrawalX = null, depositX = null, balanceX = null;
+    for (const item of allItems) {
+      const t = item.text.trim();
+      if (/^Withdrawals?\s*\(\$\)/i.test(t)) withdrawalX = item.x;
+      else if (/^Deposits?\s*\(\$\)/i.test(t)) depositX = item.x;
+      else if (/^Balance\s*\(\$\)/i.test(t)) balanceX = item.x;
+    }
+    if (!withdrawalX || !depositX) continue;
+
+    const midWD = (withdrawalX + depositX) / 2;
+    const midDB = balanceX ? (depositX + balanceX) / 2 : depositX + 80;
+
+    const parsedRows = [];
+    let currentDate = null;
+    for (const row of lines) {
+      const lineText = row.map(i => i.text).join('').trim();
+      if (!lineText || isBoilerplate(lineText) || isNoise(lineText)) continue;
+      if (/^(Opening|Closing)\s+Balance/i.test(lineText)) continue;
+
+      const dateMatch = lineText.match(/^(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/i);
+      if (dateMatch) {
+        const day = parseInt(dateMatch[1]);
+        const monthIdx = MONTHS[dateMatch[2].toLowerCase()];
+        if (monthIdx !== undefined) {
+          const year = resolveYear(monthIdx, yearInfo);
+          currentDate = toDateStr(year, monthIdx, day);
+        }
+      }
+      if (!currentDate) continue;
+
+      const amounts = [];
+      const textParts = [];
+      for (const item of row) {
+        const val = parseAmount(item.text);
+        if (val !== null && /[\d,]+\.\d{2}/.test(item.text)) {
+          let col = 'balance';
+          if (item.x < midWD) col = 'withdrawal';
+          else if (item.x < midDB) col = 'deposit';
+          amounts.push({ value: val, col, x: item.x });
+        } else {
+          const t = item.text.trim();
+          if (t && !/^\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/i.test(t)) {
+            textParts.push(t);
+          }
+        }
+      }
+
+      const withdrawal = amounts.find(a => a.col === 'withdrawal');
+      const deposit = amounts.find(a => a.col === 'deposit');
+      const desc = textParts.join(' ').trim();
+
+      if (!withdrawal && !deposit) {
+        parsedRows.push({ date: currentDate, desc, hasAmount: false });
+      } else {
+        parsedRows.push({ date: currentDate, desc, hasAmount: true, withdrawal, deposit });
+      }
+    }
+
+    for (let ri = 0; ri < parsedRows.length; ri++) {
+      const r = parsedRows[ri];
+      if (!r.hasAmount) continue;
+
+      let fullDesc = r.desc;
+      let lookback = ri - 1;
+      while (lookback >= 0 && !parsedRows[lookback].hasAmount && parsedRows[lookback].date === r.date) {
+        fullDesc = parsedRows[lookback].desc + ' ' + fullDesc;
+        lookback--;
+      }
+
+      let desc = cleanDescription(fullDesc);
+      if ((!desc || isNoise(desc)) && fullDesc.trim()) desc = fullDesc.replace(/\s{2,}/g, ' ').trim();
+      if (!desc || isNoise(desc)) continue;
+
+      if (r.withdrawal) {
+        transactions.push({ date: r.date, description: cleanMerchantName(desc), amount: -r.withdrawal.value, type: 'debit', bank: 'RBC', accountType: 'Chequing' });
+      } else {
+        transactions.push({ date: r.date, description: cleanMerchantName(desc), amount: r.deposit.value, type: 'credit', bank: 'RBC', accountType: 'Chequing' });
+      }
+    }
+  }
+
+  return transactions;
+}
+
+function parseRBCChequingText(fullText) {
   const transactions = [];
   const lines = fullText.split('\n');
   const datePattern = /^\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},?\s+\d{4})/i;
