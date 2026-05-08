@@ -3,6 +3,7 @@ import CategoryChart from './CategoryChart';
 import MonthlyChart from './MonthlyChart';
 import CategoryBreakdown from './CategoryBreakdown';
 import BankBreakdown from './BankBreakdown';
+import NeedsWantsBreakdown from './NeedsWantsBreakdown';
 import TransactionTable from './TransactionTable';
 
 function StatCard({ label, value, color }) {
@@ -52,6 +53,8 @@ export default function Dashboard({ activeTab, transactions, onCategoryClick, se
         <CategoryChart transactions={transactions} onCategoryClick={onCategoryClick} />
         <MonthlyChart transactions={transactions} />
       </div>
+
+      <NeedsWantsBreakdown transactions={transactions} onCategoryClick={onCategoryClick} />
 
       <div className="grid lg:grid-cols-2 gap-6">
         <CategoryBreakdown transactions={transactions} onCategoryClick={onCategoryClick} />

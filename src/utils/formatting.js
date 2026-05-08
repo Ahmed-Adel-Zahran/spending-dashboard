@@ -17,54 +17,65 @@ export function parseMonthYear(dateStr) {
 }
 
 export const CATEGORY_META = {
-  'Groceries':           { emoji: '🛒', color: '#4ade80' },
-  'Dining Out':          { emoji: '🍽️', color: '#f97316' },
-  'Coffee & Cafés':      { emoji: '☕', color: '#92400e' },
-  'Fast Food':           { emoji: '🍔', color: '#eab308' },
-  'Alcohol & Bars':      { emoji: '🍺', color: '#a855f7' },
-  'Gas & Fuel':          { emoji: '⛽', color: '#ef4444' },
-  'Public Transit':      { emoji: '🚌', color: '#3b82f6' },
-  'Rideshare & Taxi':    { emoji: '🚕', color: '#fbbf24' },
-  'Parking':             { emoji: '🅿️', color: '#6b7280' },
-  'Car Maintenance':     { emoji: '🔧', color: '#78716c' },
-  'Rent & Mortgage':     { emoji: '🏠', color: '#8b5cf6' },
-  'Utilities':           { emoji: '💡', color: '#f59e0b' },
-  'Internet & Phone':    { emoji: '📱', color: '#06b6d4' },
-  'Home Improvement':    { emoji: '🔨', color: '#d97706' },
-  'Furniture & Decor':   { emoji: '🪑', color: '#a16207' },
-  'Clothing & Apparel':  { emoji: '👕', color: '#ec4899' },
-  'Electronics & Tech':  { emoji: '💻', color: '#6366f1' },
-  'Amazon & Online':     { emoji: '📦', color: '#f97316' },
-  'General Shopping':    { emoji: '🛍️', color: '#d946ef' },
-  'Pharmacy & Medicine': { emoji: '💊', color: '#10b981' },
-  'Doctor & Medical':    { emoji: '🏥', color: '#14b8a6' },
-  'Dental & Vision':     { emoji: '🦷', color: '#0ea5e9' },
-  'Fitness & Gym':       { emoji: '🏋️', color: '#22c55e' },
-  'Personal Care & Spa': { emoji: '💆', color: '#f472b6' },
-  'Movies & Streaming':  { emoji: '🎬', color: '#e11d48' },
-  'Gaming':              { emoji: '🎮', color: '#7c3aed' },
-  'Events & Concerts':   { emoji: '🎵', color: '#e879f9' },
-  'Books & Media':       { emoji: '📚', color: '#0d9488' },
-  'Hobbies':             { emoji: '🎨', color: '#fb923c' },
-  'Flights':             { emoji: '✈️', color: '#0284c7' },
-  'Hotels & Lodging':    { emoji: '🏨', color: '#7c3aed' },
-  'Travel Activities':   { emoji: '🗺️', color: '#059669' },
-  'Transfers':           { emoji: '🔄', color: '#64748b' },
-  'Loan Payments':       { emoji: '🏦', color: '#475569' },
-  'Bank Fees':           { emoji: '🏧', color: '#94a3b8' },
-  'Interest Charges':    { emoji: '📈', color: '#dc2626' },
-  'ATM Withdrawals':     { emoji: '💵', color: '#65a30d' },
-  'Insurance':           { emoji: '🛡️', color: '#0891b2' },
-  'Subscriptions':       { emoji: '🔁', color: '#8b5cf6' },
-  'Memberships':         { emoji: '🎫', color: '#a855f7' },
-  'Charity & Donations': { emoji: '❤️', color: '#f43f5e' },
-  'Government & Taxes':  { emoji: '🏛️', color: '#334155' },
-  'Education & Courses': { emoji: '🎓', color: '#2563eb' },
-  'Pets':                { emoji: '🐾', color: '#ca8a04' },
-  'Kids & Family':       { emoji: '👨‍👩‍👧', color: '#e879f9' },
-  'Salary & Payroll':    { emoji: '💰', color: '#00E5A0' },
-  'Refunds & Returns':   { emoji: '↩️', color: '#22d3ee' },
-  'Uncategorized':       { emoji: '❓', color: '#475569' },
+  // Food & Drink
+  'Groceries':           { emoji: '🛒', color: '#4ade80', type: 'need' },
+  'Dining Out':          { emoji: '🍽️', color: '#f97316', type: 'want' },
+  'Coffee & Cafés':      { emoji: '☕', color: '#92400e', type: 'want' },
+  'Fast Food':           { emoji: '🍔', color: '#eab308', type: 'want' },
+  'Alcohol & Bars':      { emoji: '🍺', color: '#a855f7', type: 'want' },
+  // Transport
+  'Gas & Fuel':          { emoji: '⛽', color: '#ef4444', type: 'need' },
+  'Public Transit':      { emoji: '🚌', color: '#3b82f6', type: 'need' },
+  'Rideshare & Taxi':    { emoji: '🚕', color: '#fbbf24', type: 'want' },
+  'Parking':             { emoji: '🅿️', color: '#6b7280', type: 'need' },
+  'Car Maintenance':     { emoji: '🔧', color: '#78716c', type: 'need' },
+  // Home
+  'Rent & Mortgage':     { emoji: '🏠', color: '#8b5cf6', type: 'need' },
+  'Utilities':           { emoji: '💡', color: '#f59e0b', type: 'need' },
+  'Internet & Phone':    { emoji: '📱', color: '#06b6d4', type: 'need' },
+  'Home Improvement':    { emoji: '🔨', color: '#d97706', type: 'want' },
+  'Furniture & Decor':   { emoji: '🪑', color: '#a16207', type: 'want' },
+  // Shopping
+  'Clothing & Apparel':  { emoji: '👕', color: '#ec4899', type: 'want' },
+  'Electronics & Tech':  { emoji: '💻', color: '#6366f1', type: 'want' },
+  'Amazon & Online':     { emoji: '📦', color: '#f97316', type: 'want' },
+  'General Shopping':    { emoji: '🛍️', color: '#d946ef', type: 'want' },
+  // Health
+  'Pharmacy & Medicine': { emoji: '💊', color: '#10b981', type: 'need' },
+  'Doctor & Medical':    { emoji: '🏥', color: '#14b8a6', type: 'need' },
+  'Dental & Vision':     { emoji: '🦷', color: '#0ea5e9', type: 'need' },
+  'Fitness & Gym':       { emoji: '🏋️', color: '#22c55e', type: 'want' },
+  'Personal Care & Spa': { emoji: '💆', color: '#f472b6', type: 'want' },
+  // Entertainment
+  'Movies & Streaming':  { emoji: '🎬', color: '#e11d48', type: 'want' },
+  'Gaming':              { emoji: '🎮', color: '#7c3aed', type: 'want' },
+  'Events & Concerts':   { emoji: '🎵', color: '#e879f9', type: 'want' },
+  'Books & Media':       { emoji: '📚', color: '#0d9488', type: 'want' },
+  'Hobbies':             { emoji: '🎨', color: '#fb923c', type: 'want' },
+  // Travel
+  'Flights':             { emoji: '✈️', color: '#0284c7', type: 'want' },
+  'Hotels & Lodging':    { emoji: '🏨', color: '#7c3aed', type: 'want' },
+  'Travel Activities':   { emoji: '🗺️', color: '#059669', type: 'want' },
+  // Financial
+  'Transfers':           { emoji: '🔄', color: '#64748b', type: 'transfer' },
+  'Loan Payments':       { emoji: '🏦', color: '#475569', type: 'need' },
+  'Bank Fees':           { emoji: '🏧', color: '#94a3b8', type: 'need' },
+  'Interest Charges':    { emoji: '📈', color: '#dc2626', type: 'need' },
+  'ATM Withdrawals':     { emoji: '💵', color: '#65a30d', type: 'transfer' },
+  'Insurance':           { emoji: '🛡️', color: '#0891b2', type: 'need' },
+  // Recurring
+  'Subscriptions':       { emoji: '🔁', color: '#8b5cf6', type: 'want' },
+  'Memberships':         { emoji: '🎫', color: '#a855f7', type: 'want' },
+  // Other
+  'Charity & Donations': { emoji: '❤️', color: '#f43f5e', type: 'want' },
+  'Government & Taxes':  { emoji: '🏛️', color: '#334155', type: 'need' },
+  'Education & Courses': { emoji: '🎓', color: '#2563eb', type: 'want' },
+  'Pets':                { emoji: '🐾', color: '#ca8a04', type: 'need' },
+  'Kids & Family':       { emoji: '👨‍👩‍👧', color: '#e879f9', type: 'need' },
+  // Income
+  'Salary & Payroll':    { emoji: '💰', color: '#00E5A0', type: 'transfer' },
+  'Refunds & Returns':   { emoji: '↩️', color: '#22d3ee', type: 'transfer' },
+  'Uncategorized':       { emoji: '❓', color: '#475569', type: 'want' },
 };
 
 const CUSTOM_CATEGORIES_KEY = 'spending_dashboard_custom_categories';
@@ -101,6 +112,16 @@ export function getCategoryColor(cat) {
 export function getCategoryEmoji(cat) {
   return CATEGORY_META[cat]?.emoji || customCategories[cat]?.emoji || '❓';
 }
+
+export function getCategoryType(cat) {
+  return CATEGORY_META[cat]?.type || customCategories[cat]?.type || 'want';
+}
+
+export const SPENDING_TYPE_META = {
+  need:     { label: 'Needs',     color: '#3b82f6', description: 'Essential expenses you can\'t avoid' },
+  want:     { label: 'Wants',     color: '#f97316', description: 'Nice-to-haves you could cut back on' },
+  transfer: { label: 'Transfers', color: '#64748b', description: 'Money movement, not real spending' },
+};
 
 let idCounter = 0;
 export function generateTransactionId(tx) {

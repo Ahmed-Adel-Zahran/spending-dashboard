@@ -34,7 +34,7 @@ A client-side spending dashboard that parses Canadian bank statement PDFs and vi
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/spending-dashboard.git
+git clone https://github.com/Ahmed-Adel-Zahran/spending-dashboard.git
 cd spending-dashboard
 
 # Install
