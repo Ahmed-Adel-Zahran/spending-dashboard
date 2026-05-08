@@ -1,15 +1,25 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { formatCurrency, formatDate, getCategoryEmoji, getCategoryColor, CATEGORIES } from '../utils/formatting';
+import { formatCurrency, formatDate, getCategoryEmoji, getCategoryColor, getAllCategories, addCustomCategory } from '../utils/formatting';
 import { useTransactionStore } from '../store/transactions';
 
 const PAGE_SIZE = 50;
 
+const PALETTE = [
+  '#4ade80', '#f97316', '#a855f7', '#3b82f6', '#ef4444',
+  '#eab308', '#ec4899', '#06b6d4', '#8b5cf6', '#10b981',
+];
+
 function CategoryPicker({ transaction, anchorRef, onClose }) {
   const { updateCategory } = useTransactionStore();
   const [search, setSearch] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newEmoji, setNewEmoji] = useState('');
+  const [newColor, setNewColor] = useState(PALETTE[0]);
   const ref = useRef(null);
   const inputRef = useRef(null);
+  const nameRef = useRef(null);
   const [pos, setPos] = useState({ top: 0, left: 0, openUp: false });
 
   useEffect(() => {
@@ -31,13 +41,26 @@ function CategoryPicker({ transaction, anchorRef, onClose }) {
     return () => document.removeEventListener('mousedown', handler);
   }, [onClose, anchorRef]);
 
+  useEffect(() => {
+    if (creating) nameRef.current?.focus();
+  }, [creating]);
+
+  const categories = getAllCategories();
   const filtered = search
-    ? CATEGORIES.filter((c) => c.toLowerCase().includes(search.toLowerCase()))
-    : CATEGORIES;
+    ? categories.filter((c) => c.toLowerCase().includes(search.toLowerCase()))
+    : categories;
 
   const handleSelect = (category, applyToAll) => {
     updateCategory(transaction.id, category, applyToAll);
     onClose();
+  };
+
+  const handleCreate = () => {
+    const name = newName.trim();
+    if (!name) return;
+    const emoji = newEmoji.trim() || '🏷️';
+    addCustomCategory(name, emoji, newColor);
+    handleSelect(name, false);
   };
 
   return createPortal(
@@ -50,39 +73,106 @@ function CategoryPicker({ transaction, anchorRef, onClose }) {
         left: pos.left,
       }}
     >
-      <div className="p-2 border-b border-navy-600">
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search categories..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-navy-800 border border-navy-500 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-accent"
-        />
-      </div>
-      <div className="overflow-y-auto max-h-56">
-        {filtered.map((cat) => (
-          <div
-            key={cat}
-            className="group flex items-center justify-between px-3 py-1.5 hover:bg-navy-600 cursor-pointer text-xs"
-          >
-            <span
-              className="flex items-center gap-2 flex-1"
-              onClick={() => handleSelect(cat, false)}
-            >
-              <span>{getCategoryEmoji(cat)}</span>
-              <span className="text-slate-200">{cat}</span>
-            </span>
+      {!creating ? (
+        <>
+          <div className="p-2 border-b border-navy-600">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search categories..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-navy-800 border border-navy-500 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-accent"
+            />
+          </div>
+          <div className="overflow-y-auto max-h-48">
+            {filtered.map((cat) => (
+              <div
+                key={cat}
+                className="group flex items-center justify-between px-3 py-1.5 hover:bg-navy-600 cursor-pointer text-xs"
+              >
+                <span
+                  className="flex items-center gap-2 flex-1"
+                  onClick={() => handleSelect(cat, false)}
+                >
+                  <span>{getCategoryEmoji(cat)}</span>
+                  <span className="text-slate-200">{cat}</span>
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleSelect(cat, true); }}
+                  className="hidden group-hover:block text-accent text-[10px] hover:underline shrink-0 ml-2"
+                  title="Apply to all transactions with this merchant"
+                >
+                  apply to all
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-navy-600 p-2">
             <button
-              onClick={(e) => { e.stopPropagation(); handleSelect(cat, true); }}
-              className="hidden group-hover:block text-accent text-[10px] hover:underline shrink-0 ml-2"
-              title="Apply to all transactions with this merchant"
+              onClick={() => setCreating(true)}
+              className="w-full text-xs text-accent hover:text-accent/80 py-1 transition-colors"
             >
-              apply to all
+              + Create custom category
             </button>
           </div>
-        ))}
-      </div>
+        </>
+      ) : (
+        <div className="p-3 space-y-3">
+          <div className="text-xs font-medium text-slate-300">New Category</div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="😀"
+              value={newEmoji}
+              onChange={(e) => setNewEmoji(e.target.value)}
+              className="w-10 bg-navy-800 border border-navy-500 rounded px-1 py-1 text-center text-sm text-slate-200 focus:outline-none focus:border-accent"
+              maxLength={2}
+            />
+            <input
+              ref={nameRef}
+              type="text"
+              placeholder="Category name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              className="flex-1 bg-navy-800 border border-navy-500 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-accent"
+            />
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-500 mb-1">Color</div>
+            <div className="flex gap-1.5 flex-wrap">
+              {PALETTE.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setNewColor(c)}
+                  className="w-5 h-5 rounded-full transition-all"
+                  style={{
+                    backgroundColor: c,
+                    outline: newColor === c ? '2px solid white' : 'none',
+                    outlineOffset: 1,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCreating(false)}
+              className="flex-1 text-xs text-slate-400 hover:text-slate-200 py-1.5 rounded bg-navy-800 transition-colors"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleCreate}
+              disabled={!newName.trim()}
+              className="flex-1 text-xs text-navy-900 font-medium py-1.5 rounded bg-accent hover:bg-accent/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Create & Apply
+            </button>
+          </div>
+        </div>
+      )}
     </div>,
     document.body
   );

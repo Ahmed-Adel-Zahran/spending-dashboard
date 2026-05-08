@@ -67,14 +67,39 @@ export const CATEGORY_META = {
   'Uncategorized':       { emoji: '❓', color: '#475569' },
 };
 
+const CUSTOM_CATEGORIES_KEY = 'spending_dashboard_custom_categories';
+
+function loadCustomCategories() {
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_CATEGORIES_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+let customCategories = loadCustomCategories();
+
+export function getCustomCategories() {
+  return { ...customCategories };
+}
+
+export function addCustomCategory(name, emoji, color) {
+  customCategories[name] = { emoji, color };
+  localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(customCategories));
+}
+
+export function getAllCategories() {
+  return [...Object.keys(CATEGORY_META), ...Object.keys(customCategories)];
+}
+
 export const CATEGORIES = Object.keys(CATEGORY_META);
 
 export function getCategoryColor(cat) {
-  return CATEGORY_META[cat]?.color || '#475569';
+  return CATEGORY_META[cat]?.color || customCategories[cat]?.color || '#475569';
 }
 
 export function getCategoryEmoji(cat) {
-  return CATEGORY_META[cat]?.emoji || '❓';
+  return CATEGORY_META[cat]?.emoji || customCategories[cat]?.emoji || '❓';
 }
 
 let idCounter = 0;
